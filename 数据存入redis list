@@ -1,0 +1,27 @@
+
+@Service
+public class GoodsQaLogImpl implements GoodsQaLogSever {
+    private JedisPool jedispool;
+    private Jedis jedis;
+    @Autowired
+    private GoodsQaLogDao goodsQaLogDao;
+    @Override
+    public void updateGoodsQaLog() {
+
+        goodsQaLogDao.updateGoodsQaLog(2, 110, "");
+    }
+    @Override
+    public List<TB_GOODS_QA_LOG> selectGoodsQaLog() {
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        List<TB_GOODS_QA_LOG> list = new ArrayList<>();
+        List<String> list1 = new ArrayList<>();
+
+        for (int i = 1; i < 11; i++) {
+            int id = i;
+            jedis.lpush("uuid", String.valueOf(goodsQaLogDao.selectGoodsQaLog(id,uuid)));
+            list.add(goodsQaLogDao.selectGoodsQaLog(id, uuid));
+        }
+        System.out.println(jedis.llen(uuid));
+        return list;
+    }
+}
