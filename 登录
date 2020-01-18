@@ -1,0 +1,25 @@
+@Service
+public class LoginServer {
+    @Autowired
+    private LoginDao loginDao;
+
+    public Message login(PERSONAL_CENTER personal_center) {
+        Message message = new Message();
+        message.setSuccess(false);
+        message.setDetail(null);
+        try {
+            Long id = loginDao.login();
+//            Long id1= Long.valueOf(123);
+            if (id == null) {
+                message.setMsg("账号或密码错误,请重新输入!");
+            }else {
+                message.setMsg("登录成功");
+                message.setSuccess(true);
+                message.setDetail(null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return message;
+    }
+}
