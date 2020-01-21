@@ -1,0 +1,78 @@
+@RestController
+@RequestMapping("/personal")
+public class PersonalController {
+    @Autowired
+    private PersonalcrudServer personalcrudServer;
+    @RequestMapping("/updateuser")
+    public String adduser(String username, int age, String sex, int telephone,String driver_license, String insurance, int preminum,int id){
+        return personalcrudServer.updateuser(username,age,sex,telephone,driver_license,insurance,preminum,id);
+    }
+
+    /**
+     * 返回Select对象
+     * @param ID
+     * @return
+     */
+    @GetMapping("/selectuser")
+    public SelectUser selectuser(int ID){
+        return personalcrudServer.selectuser(ID);
+    }
+}
+
+
+@Service
+public class PersonalcrudServer {
+    @Autowired
+    PersonalDado personalDado;
+
+    /**
+     * 修改个人信息
+     * @param username
+     * @param age
+     * @param sex
+     * @param telephone
+     * @param driver_license
+     * @param insurance
+     * @param preminum
+     * @param id
+     * @return
+     */
+    public String updateuser(String username, int age, String sex, int telephone,String driver_license, String insurance, int preminum,int id){
+        personalDado.adduser(username,age,sex,telephone,driver_license,insurance,preminum,id);
+        return "修改成功!";
+    }
+
+    /**
+     * 查询个人信息
+     * @param ID
+     * @return
+     */
+    public SelectUser selectuser(int ID){
+        return personalDado.selectuser(ID);
+    }
+}
+
+@Mapper
+public interface PersonalDado {
+    /**
+     * 根据ID查个人信息
+     * @param ID
+     * @return
+     */
+    @Select("select USER_NAME,AGE,SEX,TELEPHONE,DRIVER_LICENSE,INSURANCE,PREMIUM from PERSONAL_CENTER where ID = #{id}")
+    SelectUser selectuser(@Param("id")int ID);
+
+    /**
+     * \更新个人信息
+     * @param username
+     * @param age
+     * @param sex
+     * @param telephone
+     * @param driver_license
+     * @param insurance
+     * @param preminum
+     * @param id
+     */
+    @Update("update PERSONAL_CENTER SET USER_NAME=#{username},AGE=#{age},SEX=#{sex},TELEPHONE=#{telephone},DRIVER_LICENSE=#{driver_license},INSURANCE=#{insurance},PREMIUM=#{preminum} where ID = #{id}")
+    void adduser(@Param("username")String username, @Param("age")int age, @Param("sex")String sex, @Param("telephone")int telephone, @Param("driver_license")String driver_license, @Param("insurance")String insurance, @Param("preminum")int preminum, @Param("id")int id);
+}
