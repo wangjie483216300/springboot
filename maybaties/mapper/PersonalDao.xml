@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="car.car.dao.PersonalDado">
+<!--    个人信息        < 查 >       -->
+    <select id="selectusername1111" resultType="SelectUser">
+        select USER_NAME,AGE,SEX,TELEPHONE,DRIVER_LICENSE,INSURANCE,PREMIUM from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selectusername" resultType="String">
+        select USER_NAME from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selectage" resultType="int">
+        select AGE from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selectsex" resultType="String">
+        select SEX from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selecttelephone" resultType="int">
+        select TELEPHONE from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selectORDINARY_OR_SPECIAL" resultType="int">
+        select ORDINARY_OR_SPECIAL from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selectdriver_license" resultType="String">
+        select DRIVER_LICENSE from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selectinsurance" resultType="int">
+        select INSURANCE from PERSONAL_CENTER where ID = #{id}
+    </select>
+    <select id="selectpremium" resultType="int">
+        select PREMIUM from PERSONAL_CENTER where ID = #{id}
+    </select>
+<!-- 个人信息<更新> -->
+<!--    update PERSONAL_CENTER SET USER_NAME=#{username},AGE=#{age},SEX=#{sex},TELEPHONE=#{telephone},DRIVER_LICENSE=#{driver_license},INSURANCE=#{insurance},PREMIUM=#{preminum} where ID = #{id}-->
+<!--    <update id="updateuser" >-->
+<!--        <if test="username=null">-->
+<!--            -->
+<!--        </if>-->
+<!--          update PERSONAL_CENTER SET USER_NAME=#{username} where ID = #{id}-->
+<!--    </update>-->
+</mapper>

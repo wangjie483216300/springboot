@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="car.car.dao.RegistDao">
+<!--    <resultMap id="Redist" type="car.car.bean.User">-->
+<!--        <result column="ID" jdbcType="bigint" property="ID"/>-->
+<!--        <result column="PASSWORD" jdbcType="bigint" property="PASSWORD"/>-->
+<!--        <result column="ORDINARY_OR_SPECIAL" jdbcType="int" property="ORDINARY_OR_SPECIAL"/>-->
+<!--    </resultMap>-->
+    <insert id="Regist">
+        insert into PERSONAL_CENTER(ID,PASSWORD,ORDINARY_OR_SPECIAL)values(#{id},#{psw},#{oos})
+    </insert>
+    <select id="Sel" resultType="int" >
+        select count(ifnull(ID, 0)) from PERSONAL_CENTER where ID = #{id}
+    </select>
+</mapper>
