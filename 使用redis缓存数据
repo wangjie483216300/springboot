@@ -1,0 +1,28 @@
+@Service
+public class GoodsQaLogImpl implements GoodsQaLogSever {
+    @Autowired
+    private GoodsQaLogDao goodsQaLogDao;
+    @Autowired
+    private RedisTemplate redisTemplate;
+    private Object TB_GOODS_QA_LOG;
+
+    @Override
+    public void updateGoodsQaLog() {
+        goodsQaLogDao.updateGoodsQaLog(2, 110, "");
+    }
+    @Override
+    public List<TB_GOODS_QA_LOG> selectGoodsQaLog() {
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");//生成uuid
+        for (int i = 1; i < 10; i++) {
+            int id = i;
+            redisTemplate.opsForList().leftPush(uuid,goodsQaLogDao.selectGoodsQaLog(id));
+            //将数据库查询的数据push进以uuid为名的list
+        }
+        list.addAll(redisTemplate.opsForList().range(uuid,0,-1));//存进list
+        while (redisTemplate.opsForList().size(uuid)>0){
+            System.out.println(redisTemplate.opsForList().rightPop(uuid));//清空缓存
+        }
+        System.out.println(list.size());
+        return list;//返回list
+    }
+}
