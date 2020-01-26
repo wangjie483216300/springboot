@@ -1,0 +1,24 @@
+    public String updatepsw(int id,int oldpsw,int newpsw1,int newpsw2){
+        String ss = null;
+        try {
+            int id1 = registDao.Sel(id);
+            if (id1==0){
+                ss="用户不存在,请重新输入!";
+            }else {
+                int oldpsw1=personalDado.selectpsw(id);
+                if (oldpsw1==oldpsw){
+                    if (newpsw1==newpsw2){
+                         personalDado.updatepsw(newpsw1,id);
+                        ss="密码重置成功!";
+                    }else {
+                        ss="输入新密码不一致请重新输入!";
+                    }
+                }else {
+                    ss="原始密码错误,请重新输入!";
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return ss;
+    }
