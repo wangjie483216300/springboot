@@ -1,0 +1,81 @@
+@Component
+@PropertySource("claaapath:application.properties")
+public class OSSClientUtil {
+    private static final Logger log = LoggerFactory.getLogger(OSSClientUtil.class);
+    /**阿里云的bucket名称*/
+    private static String bucketName;
+    /**阿里云账号*/
+    private static String accessKeyId;
+    /**阿里云密码*/
+    private static String accessKeySecret;
+    /** aliyun内网域名*/
+    private static String endpoint;
+    /**要存放照片的文件夹的名字*/
+    private static String filePath;
+    public OSSClientUtil(){}
+    public OSSClientUtil(String bucketName,String accessKeyId,String accessKeySecret,String endpoint,String filePath) {
+    }
+    /**获取OSSClientUtil对象*/
+    public static OSSClientUtil getOSSClientUtil(){
+        return new OSSClientUtil(bucketName,accessKeyId,accessKeySecret,endpoint,filePath);
+    }
+    public PutObjectResult putObject(MultipartFile file) throws IOException {
+        // 初始化ossClientUtil
+        OSSClientUtil ossClientUtil = OSSClientUtil.getOSSClientUtil();
+        // 获取文件的输入流
+        InputStream in = file.getInputStream();
+        // 创建Metadata
+        ObjectMetadata meta = new ObjectMetadata();
+        // 设置ContentLength
+        meta.setContentLength(in.available());
+        // 上传Object.
+        PutObjectResult result =ossClientUtil.putObject(bucketName, accessKeySecret, in, meta);
+        System.out.println(result.getETag());
+        return result;
+    }
+    @Value("aliyun.oss.bucketName")
+    public static void setBucketName(String bucketName) {
+        OSSClientUtil.bucketName = bucketName;
+    }
+    @Value("aliyun.oss.accessKeyId")
+    public static void setAccessKeyId(String accessKeyId) {
+        OSSClientUtil.accessKeyId = accessKeyId;
+    }
+    @Value("aliyun.oss.accessKeySecret")
+    public static void setAccessKeySecret(String accessKeySecret) {
+        OSSClientUtil.accessKeySecret = accessKeySecret;
+    }
+    @Value("aliyun.oss.endpoint")
+    public static void setEndpoint(String endpoint) {
+        OSSClientUtil.endpoint = endpoint;
+    }
+    @Value("aliyun.oss.filePath")
+    public static void setFilePath(String filePath) {
+        OSSClientUtil.filePath = filePath;
+    }
+
+    public static Logger getLog() {
+        return log;
+    }
+
+    public static String getBucketName() {
+        return bucketName;
+    }
+
+    public static String getAccessKeyId() {
+        return accessKeyId;
+    }
+
+    public static String getAccessKeySecret() {
+        return accessKeySecret;
+    }
+
+    public static String getEndpoint() {
+        return endpoint;
+    }
+
+    public static String getFilePath() {
+        return filePath;
+    }
+
+}
