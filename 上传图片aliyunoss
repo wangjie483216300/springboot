@@ -1,0 +1,65 @@
+/**severce层*/
+@Service
+@Component
+public class OSSClientUtil  {
+    /**日志*/
+    private static final Logger log = LoggerFactory.getLogger(OSSClientUtil.class);
+    /**阿里云bucket名称*/
+    private static String bucketName="jie-wang483216300";
+    /**阿里云key*/
+    private static String accessKeyId="*************";
+    /** 阿里云psw*/
+    private static String accessKeySecret="*************";
+    /** aliyun内网域名*/
+    private static String endpoint="oss-cn-beijing.aliyuncs.com";
+    /**要存放照片的文件夹的名字*/
+    private static String filePath="CAR/";
+    /**获取OSSClientUtil对象*/
+    public static OSS getOSSClientUtil(){
+        return new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+    }
+    /**
+     *上传图片并获取url
+     * @param file
+     * @return
+     */
+    public String uploadFile(MultipartFile file) {
+        String ret = "";
+        String filename = file.getOriginalFilename();
+        InputStream inputStream = null;
+        try {
+            inputStream=file.getInputStream();
+            /**上传文件*/
+            OSS ossClient = OSSClientUtil.getOSSClientUtil();
+            /**创建上传Object的Metadata*/
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            /**设置ContentLengt*/
+            objectMetadata.setContentLength(inputStream.available());
+            /**访问有关从putObject请求创建的新对象的信息*/
+            PutObjectResult putResult = ossClient.putObject(bucketName, filename, inputStream, objectMetadata);
+            ret = putResult.getETag();
+        } catch (IOException e) {
+            log.error(e.getMessage(),e);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "上传图片成功:"+ret;
+    }
+
+/**controller层*/
+@RestController
+public class UploadImagController {
+    @Autowired
+    private OSSClientUtil ossClientUtil;
+
+    @PostMapping("/uploadImg")
+    public String uploadImg(@RequestParam("file") MultipartFile file) {
+        return ossClientUtil.uploadFile(file);
+    }
+}
