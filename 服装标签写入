@@ -1,0 +1,48 @@
+@Controller
+@RequestMapping("/write")
+public class WriteController {
+    @Autowired
+    private WriteServer writeServer;
+
+    @PostMapping("/goodInfo")
+    boolean goodInfo(String type,String style,String color,String size){
+        return writeServer.goodInfo(type,style,color,size);
+    }
+}
+/*****************************************************************************/
+@mapper
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.WriteDao">
+    <insert id="goodInfo">
+        insert into TB_GOODS_INFO (ID,TYPE_NAME,TYPE_ID,STYLE_NAME,STYLE_ID,COLOR_NAME,COLOR_ID,SIZE_NAME,SIZE_ID)values(#{id},#{type},#{typeid},#{style},#{styleid},#{color},#{colorid},#{size},#{sizeid})
+    </insert>
+</mapper>
+/*****************************************************************************/
+@Service
+public class WriteServer {
+    @Autowired
+    private WriteDao writeDao;
+    @Autowired
+    private RedisTemplate redisTemplate;
+    private static String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+
+    public boolean goodInfo( String type, String style, String color, String size){
+        boolean state=false;
+
+            try {
+            String id = UUID.randomUUID().toString().replaceAll("-", "");
+            String typeid = UUID.randomUUID().toString().replaceAll("-", "");
+            String styleid = UUID.randomUUID().toString().replaceAll("-", "");
+            String colorid = UUID.randomUUID().toString().replaceAll("-", "");
+            String sizeid = UUID.randomUUID().toString().replaceAll("-", "");
+            writeDao.goodInfo(id, type, typeid, style, styleid, color, colorid, size, sizeid);
+            state=true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+//        }
+        return state;
+    }
+}
+
