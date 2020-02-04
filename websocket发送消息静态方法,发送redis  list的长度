@@ -1,0 +1,23 @@
+
+    //注入redis   bean  
+    private static RedisTemplate redisTemplate;
+    @Autowired
+    public void setRedisTemplate(RedisTemplate redisTemplate){
+        WebSocketServer.redisTemplate = redisTemplate;
+    }
+    //发送redis  list.size();
+    public static void SendMessage(Session session, String uuid) {
+        try {
+            session.getBasicRemote().sendText(String.valueOf(redisTemplate.opsForList().size(uuid)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    //发送消息
+    public static void sendInfo(String uuid) throws IOException {
+        for (Session session : SessionSet) {
+            if(session.isOpen()){
+                SendMessage(session, uuid);
+            }
+        }
+    }
