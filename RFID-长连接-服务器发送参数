@@ -1,0 +1,106 @@
+
+接口地址	ws:服务器IP：开放端口号/websocket
+服务器发送参数	参数示例	类型	参数描述
+tagnum/001/234	String	单次消息需要消息前缀，前端接到/分词后，做相应用处,234个，带num/前缀的消息会大量发送，前端接收到替换显示，达到用户酸爽的效果,tag和num一起发是为了入库出库时一次提交不同类型时做区分。
+workernum/dkjash/34	string	workernum/前缀表示 缝纫ID对应的数量例子里dkjash为ID 
+moreinfo/衣服/Gbdll/z732/300/155/30	string	出入库时详细扫描信息均以商品款式，色号，类型先统计一次总数量，然后再按尺码细分，所以前台拿到后分类取用显示
+客户端发送消息	无
+备注:RFID写入，质检，出入库，长连接时都需要数量，但还各需要其他数据，后台发送全部消息，前台根据消息前缀自己取用，例如RFID写入时，页面只需要解析tagnum/为前缀的消息，且只取用num的值。
+
+/****************WEBSOCKET导入bean***************/  
+    private static GetTypeServer getTypeServer;
+    @Autowired
+    public void setGetTypeServer(GetTypeServer getTypeServer) {
+        WebSocketServer.getTypeServer = getTypeServer;
+    }
+    private static GetStyleServer getStyleServer;
+    @Autowired
+    public void setGetStyleServer(GetStyleServer getStyleServer) {
+        WebSocketServer.getStyleServer = getStyleServer;
+    }
+    private static GetColorServer getColorServer;
+    @Autowired
+    public  void setGetColorServer(GetColorServer getColorServer) {
+        WebSocketServer.getColorServer = getColorServer;
+    }
+    private static GetSizeServer getSizeServer;
+    @Autowired
+    public void setGetSizeServer(GetSizeServer getSizeServer) {
+        WebSocketServer.getSizeServer = getSizeServer;
+    }
+    private static RedisTemplate redisTemplate;
+    @Autowired
+    public void setRedisTemplate(RedisTemplate redisTemplate){
+        WebSocketServer.redisTemplate = redisTemplate;
+    }
+    private static WriteServer writeServer;
+    @Autowired
+    public void setWriteServer(WriteServer writeServer){
+        WebSocketServer.writeServer=writeServer;
+    }
+/*****************封装静态方法***********************************************************************************/
+
+    /**传入uuid返回相应redis链表长度和(tagnum/001/234)---(rfid写入部分)*/
+    public static void SendMessage(Session session, String uuid) {
+        try {
+            session.getBasicRemote().sendText("tagnum/"+uuid+"/"+String.valueOf(redisTemplate.opsForList().size(uuid)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void sendRedisCount(String uuid) throws IOException {
+        for (Session session : SessionSet) {
+            if(session.isOpen()){
+                SendMessage(session, uuid);
+            }
+        }
+    }
+    /**返回---workernum/QA_ID/数量 */
+    public static void SendWorkernum(Session session){
+        try {
+            for (int i=0;i<writeServer.getInfotailorID().size();i++){
+                session.getBasicRemote().sendText(writeServer.getInfotailorID().get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void sendWorkerCount() throws IOException {
+        for (Session session : SessionSet) {
+            if(session.isOpen()){
+                SendWorkernum(session);
+            }
+        }
+    }
+    /**传入uuid返回相应字符串---moreinfo/衣服/Gbdll/z732/300/155/30---商品款式，色号，类型先统计一次总数量，然后再按尺码细分*/
+    public static void SendMoreinfo(Session session){
+        try {
+            String moreinfo="";
+            for (int a=0;a<getTypeServer.GetType1().size();a++){
+                String type = getTypeServer.GetType1().get(a);
+                for (int b=0;b<getStyleServer.getStyle1(type).size();b++){
+                    String style = getStyleServer.getStyle1(type).get(b);
+                    for (int c = 0; c < getColorServer.selectColor1(type,style).size();c++){
+                        String color = getColorServer.selectColor1(type,style).get(c);
+                        int count1 = getTypeServer.getcount1(type,style,color);
+                        for (int d=0;d<getSizeServer.getSize1(type,style,color).size();d++){
+                            String size=getSizeServer.getSize1(type,style,color).get(d);
+                            int count2=getTypeServer.getcount2(type,style,color,size);
+                            moreinfo= "moreinfo/"+type+"/"+style+"/"+color+"/"+count1+"/"+size+"/"+count2;
+                            session.getBasicRemote().sendText(moreinfo);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void sendMoreinfo() throws IOException {
+        for (Session session : SessionSet) {
+            if(session.isOpen()){
+                SendMoreinfo(session);
+            }
+        }
+    }
+/**************************************************************************************************************/
