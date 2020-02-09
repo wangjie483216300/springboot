@@ -1,0 +1,221 @@
+/*******************get部分**********************/
+    /**查出每个rfid对应的type部分*/
+    public List<String> getType1(List<String> rfidlist){
+        String ID="";
+        String rfid="";
+        List<String> typelist=new ArrayList<>();
+       for (int i = 0;i<rfidlist.size();i++){
+            rfid= rfidlist.get(i);
+            ID=getTypeDao.selectID(rfid);
+            String type=getTypeDao.selectType1(ID);
+            typelist.add(type);
+        }
+        List<String> listNew = new ArrayList<String>();
+        Set set = new HashSet();
+        for (String str : typelist) {
+            if (set.add(str)) {
+                if (str!=null){
+                    listNew.add(str);
+                }
+            }
+        }
+        return listNew;
+    }
+    /**查出每个rfid对应的style部分*/
+    public List<String> getStyle1(List<String> rfidlist,String type){
+        String ID="";
+        String rfid="";
+        List<String> stylelist=new ArrayList<>();
+        for (int i = 0;i<rfidlist.size();i++){
+            rfid= rfidlist.get(i);
+            ID=getTypeDao.selectID(rfid);
+            String style=getTypeDao.selectStyle1(type,ID);
+            stylelist.add(style);
+        }
+        List<String> listNew = new ArrayList<String>();
+        Set set = new HashSet();
+        for (String str : stylelist) {
+            if (set.add(str)) {
+                if (str!=null){
+                    listNew.add(str);
+                }
+            }
+        }
+        return listNew;
+    }
+    /**查出每个rfid对应的color部分*/
+    public List<String> getColor1(List<String> rfidlist,String type,String style) {
+        String ID = "";
+        String rfid = "";
+        List<String> colorlist = new ArrayList<>();
+        for (int i = 0; i < rfidlist.size(); i++) {
+            rfid = rfidlist.get(i);
+            ID = getTypeDao.selectID(rfid);
+            String color = getTypeDao.selectColor1(type,style,ID);
+            colorlist.add(color);
+        }
+        List<String> listNew = new ArrayList<String>();
+        Set set = new HashSet();
+        for (String str : colorlist) {
+            if (set.add(str)) {
+                if (str!=null){
+                    listNew.add(str);
+                }
+            }
+        }
+        return listNew;
+    }
+    /**查出每个rfid对应的size部分*/
+    public List<String> getSize1(List<String> rfidlist,String type,String style,String color){
+        String ID = "";
+        String rfid = "";
+        String sizename = "";
+        List<String> sizelist = new ArrayList<>();
+        for (int i = 0; i < rfidlist.size(); i++) {
+            rfid = rfidlist.get(i);
+            ID = getTypeDao.selectID(rfid);
+            String size = getTypeDao.selectSize1(type,style,color,ID);
+            sizelist.add(size);
+        }
+        List<String> listNew = new ArrayList<String>();
+        Set set = new HashSet();
+        for (String str : sizelist) {
+            if (set.add(str)) {
+                if (str!=null){
+                    listNew.add(str);
+                }
+            }
+        }
+        return listNew;
+    }
+        /**计数部分*/
+    public int getcount1(String type,String style,String color){
+        return getTypeDao.getcount1(type,style,color);
+    }
+    public int getcount2(String type,String style,String color,String size){
+        return getTypeDao.getcount2(type,style,color,size);
+    }
+
+
+    /*****缝纫机技师部分******/
+    public List<Integer> getInfotailor(List<String> rfidlist){
+        String ID = "";
+        String rfid = "";
+        int infotailor = 0;
+        List<Integer> QAlist = new ArrayList<>();
+        for (int i = 0 ;  i < rfidlist.size() ; i++ ){
+            rfid = rfidlist.get(i);
+            ID = getTypeDao.selectID(rfid);
+            infotailor = getTypeDao.selectInfotailor(ID);
+            QAlist.add(infotailor);
+        }
+        List<Integer> listNew = new ArrayList<>();
+        Set set = new HashSet();
+        for (int str : QAlist) {
+            if (set.add(str)) {
+                    listNew.add(str);
+            }
+        }
+        System.out.println("AAA  :   "+listNew);
+        return listNew;
+    }
+    public int getcount3(int QA_ID){
+        return getTypeDao.getcount3(QA_ID);
+    }
+/*************************websocket部分****************************/
+
+    /**传入uuid返回相应redis链表长度和(tagnum/001/234)---(rfid写入部分)*/
+    public static void SendMessage(Session session, String uuid) {
+        try {
+            session.getBasicRemote().sendText("tagnum/"+uuid+"/"+String.valueOf(redisTemplate.opsForList().size(uuid)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void sendRedisCount(String uuid) throws IOException {
+        for (Session session : SessionSet) {
+            if(session.isOpen()){
+                SendMessage(session, uuid);
+            }
+        }
+    }
+    /**返回---workernum/QA_ID/数量 */
+    public static void SendWorkernum(Session session,String uuid){
+        try {
+            List<String> rfidlist = new ArrayList<>();
+            List<String> redislist = new ArrayList<>();
+            while (redisTemplate.opsForList().size(uuid)>0){
+                String testrfid=String.valueOf(redisTemplate.opsForList().leftPop(uuid));
+                rfidlist.add(testrfid);
+                redislist.add(testrfid);
+            }
+            for (int i = 0;i < redislist.size(); i++){
+                String rfid = redislist.get(i);
+                redisTemplate.opsForList().leftPush(uuid,rfid);
+            }
+            for (int a = 0 ; a < getTypeServer.getInfotailor(rfidlist).size() ; a++){
+                int QA = getTypeServer.getInfotailor(rfidlist).get(a);
+                String message = "workernum/"+QA+"/"+getTypeServer.getcount3(QA);
+                session.getBasicRemote().sendText(message);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void sendWorkerCount(String uuid) throws IOException {
+        for (Session session : SessionSet) {
+            if(session.isOpen()){
+                SendWorkernum(session,uuid);
+            }
+        }
+    }
+    /**传入uuid返回相应字符串---moreinfo/衣服/Gbdll/z732/300/155/30---商品款式，色号，类型先统计一次总数量，然后再按尺码细分*/
+    public static void SendMoreinfo(Session session,String uuid){
+
+        try {
+            String moreinfo="";
+            List<String> rfidlist = new ArrayList<>();
+            List<String> redislist = new ArrayList<>();
+            while (redisTemplate.opsForList().size(uuid)>0){
+                String testrfid=String.valueOf(redisTemplate.opsForList().leftPop(uuid));
+                rfidlist.add(testrfid);
+                redislist.add(testrfid);
+            }
+            for (int i = 0;i < redislist.size(); i++){
+                String rfid = redislist.get(i);
+                redisTemplate.opsForList().leftPush(uuid,rfid);
+            }
+            System.out.println(rfidlist);
+            for (int a=0;a<getTypeServer.getType1(rfidlist).size();a++){
+                System.out.println(getTypeServer.getType1(rfidlist).size());
+                String type = getTypeServer.getType1(rfidlist).get(a);
+                for (int b=0;b<getTypeServer.getStyle1(rfidlist,type).size();b++){
+                    System.out.println(getTypeServer.getStyle1(rfidlist,type).size());
+                    String style = getTypeServer.getStyle1(rfidlist,type).get(b);
+                    for (int c = 0; c < getTypeServer.getColor1(rfidlist,type,style).size(); c++){
+                        String color = getTypeServer.getColor1(rfidlist,type,style).get(c);
+                        String size="";
+                        for (int d=0;d<getTypeServer.getSize1(rfidlist,type,style,color).size();d++){
+                            if (d==0){ }else {
+                                int count2 = getTypeServer.getcount2(type,style,color,getTypeServer.getSize1(rfidlist,type,style,color).get(d-1));
+                                size=size+getTypeServer.getSize1(rfidlist,type,style,color).get(d-1)+"/"+count2+"/"; }
+                            }
+                        int count2 = getTypeServer.getcount2(type,style,color,getTypeServer.getSize1(rfidlist,type,style,color).get(getTypeServer.getSize1(rfidlist,type,style,color).size()-1));
+                        size=size+getTypeServer.getSize1(rfidlist,type,style,color).get(getTypeServer.getSize1(rfidlist,type,style,color).size()-1)+"/"+count2;
+                        int count1 = getTypeServer.getcount1(type,style,color);
+                        moreinfo= "moreinfo/"+type+"/"+style+"/"+color+"/"+count1+"/"+size;
+                        session.getBasicRemote().sendText(moreinfo);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void sendMoreinfo(String uuid) throws IOException {
+        for (Session session : SessionSet) {
+            if(session.isOpen()){
+                SendMoreinfo(session,uuid);
+            }
+        }
+    }
