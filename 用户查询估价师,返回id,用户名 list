@@ -1,0 +1,33 @@
+
+/**查询估价师,返回list*/
+@Service
+public class SelectEvaServer {
+    @Autowired
+    private SelectEvaDao selectEvaDao;
+    public List<String> selectEVA(int ORDINARY_ID){
+        String result = "";
+        List<String> list = new ArrayList<>();
+        for (int i = 0 ; i < selectEvaDao.selectID(ORDINARY_ID).length ; i++){
+            String username = selectEvaDao.selectUsername(selectEvaDao.selectID(ORDINARY_ID)[i]);
+            result = result
+                    +"{"+"估价师ID:"+selectEvaDao.selectID(ORDINARY_ID)[i]
+                    +","+"用户名:"+username+"}"+",";
+        }
+        String[] strings =result.split("},");
+        for (int j = 0 ; j < strings.length ; j++ ){
+            try {
+                JSONObject jsonObject = new JSONObject(strings[j]+"}");
+                list.add(jsonObject.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            JSONObject jsonObject1 = new JSONObject(list.get(1));
+            System.out.println(jsonObject1);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+}
