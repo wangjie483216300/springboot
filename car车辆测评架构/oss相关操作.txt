@@ -1,0 +1,141 @@
+ /**oss上传车型图片*/
+    public String uploadFileVehicleImg(MultipartFile file,int id) {
+        /**获取文件名*/
+        String imgname="VehicleImg";
+        String filename = String.valueOf(id)+imgname;
+        /**数据流*/
+        InputStream inputStream = null;
+        /**oss对象*/
+        OSS ossClient = null;
+        try {
+            /**获取数据流*/
+            inputStream=file.getInputStream();
+            /**创建oss对象*/
+            ossClient = ossClientUtil.getOSSClientUtil();
+            /**创建上传Object的Metadata*/
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            /**设置ContentLengt*/
+            objectMetadata.setContentLength(inputStream.available());
+            /**上传文件*/
+            ossClient.putObject(OSSClientUtil.getBucketName(), filename, inputStream, objectMetadata);
+        } catch (IOException e) {
+            log.error(e.getMessage(),e);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    /**关闭数据流*/
+                    inputStream.close();
+                    ossClient.shutdown();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "上传成功:"+filename;
+    }
+    /**oss-获取车型并返回图片*/
+    public byte[] putVehicleImg(int id){
+        String imgname="VehicleImg";
+        String filename= String.valueOf(id)+imgname;
+        OSS ossClient;
+        OSSObject ossObject;
+        InputStream inputStream;
+        byte[] btImg = new byte[0];
+        try {
+            ossClient=OSSClientUtil.getOSSClientUtil();
+            ossObject= ossClient.getObject(OSSClientUtil.getBucketName(), filename);
+            inputStream =ossObject.getObjectContent();
+            btImg = readInputStream(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return btImg;
+    }
+    /**oss上传车损图片*/
+    public String uploadFileDamageImg(MultipartFile file,int id) {
+        /**获取文件名*/
+        String imgname="DamageImg";
+        String filename = String.valueOf(id)+imgname;
+        /**数据流*/
+        InputStream inputStream = null;
+        /**oss对象*/
+        OSS ossClient = null;
+        try {
+            /**获取数据流*/
+            inputStream=file.getInputStream();
+            /**创建oss对象*/
+            ossClient = ossClientUtil.getOSSClientUtil();
+            /**创建上传Object的Metadata*/
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            /**设置ContentLengt*/
+            objectMetadata.setContentLength(inputStream.available());
+            /**上传文件*/
+            ossClient.putObject(OSSClientUtil.getBucketName(), filename, inputStream, objectMetadata);
+        } catch (IOException e) {
+            log.error(e.getMessage(),e);
+        } finally {
+            try {
+                if (inputStream != null) {
+                    /**关闭数据流*/
+                    inputStream.close();
+                    ossClient.shutdown();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "上传成功:"+filename;
+    }
+    /**oss-获取车型并返回图片*/
+    public byte[] putDamageImg(int id){
+        String imgname="DamageImg";
+        String filename= String.valueOf(id)+imgname;
+        OSS ossClient;
+        OSSObject ossObject;
+        InputStream inputStream;
+        byte[] btImg = new byte[0];
+        try {
+            ossClient=OSSClientUtil.getOSSClientUtil();
+            ossObject= ossClient.getObject(OSSClientUtil.getBucketName(), filename);
+            inputStream =ossObject.getObjectContent();
+            btImg = readInputStream(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return btImg;
+    }
+    /**转换byte[]*/
+    public static byte[] readInputStream(InputStream inStream) throws Exception{
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len = 0;
+        while( (len=inStream.read(buffer)) != -1 ){
+            outStream.write(buffer, 0, len);
+        }
+        inStream.close();
+        return outStream.toByteArray();
+    }
+    /**删除车型图片*/
+    public static void deleteVehicleImg(int id){
+        /**获取文件名*/
+        String imgname="VehicleImg";
+        String filename= String.valueOf(id)+imgname;
+        /** 创建OSSClient实例。*/
+        OSS ossClient = OSSClientUtil.getOSSClientUtil();
+        /**删除文件。如需删除文件夹，请将ObjectName设置为对应的文件夹名称。如果文件夹非空，则需要将文件夹下的所有object删除后才能删除该文件夹。*/
+        ossClient.deleteObject(OSSClientUtil.getBucketName(), filename);
+        /** 关闭OSSClient。*/
+        ossClient.shutdown();
+    }
+    /**删除车损图片*/
+    public static void deleteDamageImg(int id){
+        /**获取文件名*/
+        String imgname="DamageImg";
+        String filename= String.valueOf(id)+imgname;
+        /** 创建OSSClient实例。*/
+        OSS ossClient = OSSClientUtil.getOSSClientUtil();
+        /**删除文件。如需删除文件夹，请将ObjectName设置为对应的文件夹名称。如果文件夹非空，则需要将文件夹下的所有object删除后才能删除该文件夹。*/
+        ossClient.deleteObject(OSSClientUtil.getBucketName(), filename);
+        /** 关闭OSSClient。*/
+        ossClient.shutdown();
+    }
