@@ -1,0 +1,181 @@
+package car.car.service;
+
+import car.car.dao.OrderDao;
+import car.car.dao.SelectEvaDao;
+import com.google.gson.JsonObject;
+import org.apache.ibatis.annotations.Param;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class OrderServer {
+    @Autowired
+    private OrderDao orderDao;
+    @Autowired
+    private SelectEvaDao selectEvaDao;
+    /**下订单*/
+    public String placingOrder(int EVA_ID,String EVA_NAME,int ORDINARY_ID,String ORD_NAME){
+        String state = "true";
+        try {
+            String id = UUID.randomUUID().toString().replaceAll("-", "");
+            orderDao.insertOrder(id,EVA_ID,EVA_NAME,ORDINARY_ID,ORD_NAME);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            state="false";
+        }
+       return state;
+    }
+    /**用户查询订单个数---->返回估价师id,用户名,数组*/
+    public List<String> generalQuery(int ORDINARY_ID){
+        List<String> list = new ArrayList<>();
+        try {
+            for (int i = 0 ; i < orderDao.selectEVAID1(ORDINARY_ID).length; i++ ){
+                int id = orderDao.selectEVAID1(ORDINARY_ID)[i];
+                String username = orderDao.selectEVAUSERNAME(id);
+                try {
+                    JSONObject jsonObject = new JSONObject("{"+"ID:"+id+","+"用户名:"+username+"}");
+                    list.add(jsonObject.toString());
+                } catch (JSONException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            int id = orderDao.selectEVAID2(ORDINARY_ID);
+            String username = orderDao.selectEVAUSERNAME(id);
+            try {
+                JSONObject jsonObject = new JSONObject("{"+"ID:"+id+","+"用户名:"+username+"}");
+                list.add(jsonObject.toString());
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+        }
+        return list;
+    }
+    /**估价师查询订单个数*/
+    public List<String> EvageneralQuery(int EVA_ID){
+        List<String> list = new ArrayList<>();
+        try {
+            for (int i = 0 ; i < orderDao.selectORDINARYID1(EVA_ID).length; i++ ){
+                int id = orderDao.selectORDINARYID1(EVA_ID)[i];
+                String username = orderDao.selectORDNAME(id);
+                try {
+                    JSONObject jsonObject = new JSONObject("{"+"ID:"+id+","+"用户名:"+username+"}");
+                    list.add(jsonObject.toString());
+                } catch (JSONException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            int id = orderDao.selectORDINARYID2(EVA_ID);
+            String username = orderDao.selectORDNAME(id);
+            try {
+                JSONObject jsonObject = new JSONObject("{"+"ID:"+id+","+"用户名:"+username+"}");
+                list.add(jsonObject.toString());
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+        }
+        return list;
+
+    }
+    /**估价师对订单进行编辑*/
+    public String Assessment(String CAR_TYPE, String CAR_COLOR, String CAR_YEAR,List<String> list,String CAR_VALUE,int EVA_ID,int ORDINARY_ID){
+        String state = "true";
+        String DANGE_POSITION1="";
+        String DANGE_TYPE1="";
+        String DANGE_PERCENT1="";
+        String CAR_LOSS1="";
+        try {
+            List<String> DANGE_POSITION = new ArrayList<>();
+            List<String> DANGE_TYPE = new ArrayList<>();
+            List<String> DANGE_PERCENT = new ArrayList<>();
+            List<String> CAR_LOSS = new ArrayList<>();
+            for (int i= 0 ;i < list.size() ; i++ ){
+                JSONObject jsonObject = new JSONObject(list.get(i));
+                DANGE_POSITION.add(jsonObject.getString("受损部位"));
+                DANGE_TYPE.add(jsonObject.getString("受损类型"));
+                DANGE_PERCENT.add(jsonObject.getString("受损百分比"));
+                CAR_LOSS.add(jsonObject.getString("受损价值"));
+            }
+            for (int j = 0 ; j < list.size() ; j++ ){
+                if (j!=(list.size()-1)){
+                    DANGE_POSITION1 = DANGE_POSITION1 + DANGE_POSITION.get(j)+",";
+                    DANGE_TYPE1 = DANGE_TYPE1+DANGE_TYPE.get(j)+",";
+                    DANGE_PERCENT1 = DANGE_PERCENT1+DANGE_PERCENT.get(j)+",";
+                    CAR_LOSS1 = CAR_LOSS1 + CAR_LOSS.get(j)+",";
+                }else {
+                    DANGE_POSITION1 = DANGE_POSITION1 + DANGE_POSITION.get(j);
+                    DANGE_TYPE1 = DANGE_TYPE1+DANGE_TYPE.get(j);
+                    DANGE_PERCENT1 = DANGE_PERCENT1+DANGE_PERCENT.get(j);
+                    CAR_LOSS1 = CAR_LOSS1 + CAR_LOSS.get(j);
+                }
+            }
+            DANGE_POSITION1 = "{"+DANGE_POSITION1+"}";
+            DANGE_TYPE1 = "{"+DANGE_TYPE1+"}";
+            DANGE_PERCENT1 = "{"+DANGE_PERCENT1+"}";
+            CAR_LOSS1 = "{"+CAR_LOSS1+"}";
+            orderDao.Assessment(CAR_TYPE,CAR_COLOR,CAR_YEAR,DANGE_POSITION1,DANGE_TYPE1,DANGE_PERCENT1,CAR_LOSS1,CAR_VALUE,EVA_ID,ORDINARY_ID);
+        } catch (Exception e) {
+            state = "false";
+            e.printStackTrace();
+        }
+        return state;
+    }
+    /**用户查询具体订单信息*/
+    public String specialQuery(Integer EVA_ID,Integer ORDINARY_ID){
+        String result = "";
+        String message = "";
+        try {
+            String[] stringsDANGE_POSITION = orderDao.DANGE_POSITION(EVA_ID,ORDINARY_ID)
+                    .replace("{","")
+                    .replace("}","")
+                    .split(",");
+            String[] stringsDANGE_TYPE = orderDao.DANGE_TYPE(EVA_ID,ORDINARY_ID)
+                    .replace("{","")
+                    .replace("}","")
+                    .split(",");
+            String[] stringsDANGE_PERCENT = orderDao.DANGE_PERCENT(EVA_ID,ORDINARY_ID)
+                    .replace("{","")
+                    .replace("}","")
+                    .split(",");
+            String[] stringsCAR_LOSS = orderDao.CAR_LOSS(EVA_ID,ORDINARY_ID)
+                    .replace("{","")
+                    .replace("}","")
+                    .split(",");
+            for (int i = 0 ; i < stringsDANGE_POSITION.length ; i++ ){
+                if (i==(stringsDANGE_POSITION.length-1)){
+                    message = message+"{"+stringsDANGE_POSITION[i]+","
+                            +stringsDANGE_TYPE[i]+","
+                            +stringsDANGE_PERCENT[i]+","
+                            +stringsCAR_LOSS[i]+"}";
+                }else {
+                    message = message+"{"+stringsDANGE_POSITION[i]+","
+                            +stringsDANGE_TYPE[i]+","
+                            +stringsDANGE_PERCENT[i]+","
+                            +stringsCAR_LOSS[i]+"},";
+                }
+                message = "{"+message+"}";
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("车辆型号",orderDao.CAR_TYPE(EVA_ID,ORDINARY_ID));
+                jsonObject.put("车辆颜色",orderDao.CAR_COLOR(EVA_ID,ORDINARY_ID));
+                jsonObject.put("车辆年份",orderDao.CAR_YEAR(EVA_ID,ORDINARY_ID));
+                jsonObject.put("车辆受损信息",message);
+                jsonObject.put("车辆估算价值",orderDao.CAR_VALUE(EVA_ID,ORDINARY_ID));
+                result = jsonObject.toString();
+            }
+        } catch (Exception e) {
+            result = "false";
+            e.printStackTrace();
+        }
+        return result;
+    }
+}
