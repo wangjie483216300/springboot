@@ -1,0 +1,51 @@
+ /**判断小时限制方法*/
+    public String vecodeTimeHour(String telephone , String vecode){
+        String message = "ture";
+        try {
+            /**添加初始值------->redis操作list(放入发送成功了的验证码)*/
+            stringRedisTemplate.opsForList().leftPush(telephone+"11",vecode);
+            /**设置过期时间为1小时*/
+            stringRedisTemplate.expire(telephone+"11",1,TimeUnit.HOURS);
+            /**判断redis长度是否大6*/
+            if (stringRedisTemplate.opsForList().size(telephone+"11") <=5 ){
+                /**没有超过5
+                 * 这里调用发送短信的接口-->用户发送短信
+                 * */
+            }else {
+                /**达到了小时级限制--->弹出窗口返回剩余的时间*/
+                message = String.valueOf(stringRedisTemplate.getExpire(telephone+"11", TimeUnit.SECONDS));
+                message = "请求限制,请等待: "+message+" 秒!";
+            }
+        } catch (Exception e) {
+            /**程序出错,返回false*/
+            message = "false";
+            e.printStackTrace();
+        }
+        return message;
+    }
+    /**判断天限制方法*/
+    public  String vecodeTimeDay(String telephone , String vecode){
+        String message = "ture";
+        try {
+            /**添加初始值------->redis操作list(放入发送成功了的验证码)*/
+            stringRedisTemplate.opsForList().leftPush(telephone+"22",vecode);
+            /**设置过期时间为1小时*/
+            stringRedisTemplate.expire(telephone+"22",1,TimeUnit.DAYS);
+            /**判断redis长度是否大6*/
+            if (stringRedisTemplate.opsForList().size(telephone+"22") <= 10 ){
+                /**没有超过10
+                 * 这里调用发送短信的接口-->用户发送短信
+                 * */
+            }else {
+                /**达到了小时级限制--->弹出窗口返回剩余的时间*/
+                message = String.valueOf(stringRedisTemplate.getExpire(telephone+"22", TimeUnit.HOURS));
+                message = "请求限制,请等待: "+message+" 小时!";
+            }
+        } catch (Exception e) {
+            /**程序出错,返回false*/
+            message = "false";
+            e.printStackTrace();
+        }
+        return message;
+    }
+}
