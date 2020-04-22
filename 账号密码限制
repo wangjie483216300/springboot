@@ -1,0 +1,58 @@
+  /**
+     * 判断账号是否由11位数字构成
+     * @param str
+     * @return
+     */
+    public static String CheckNumber(String str){
+        String message = "true";
+        char[] chars = str.toCharArray();
+        for(int i = 0;i < chars.length;i++){
+            if(chars[i] < '0' || chars[i] > '9'){
+                message = "请输入数字";
+                break;
+            }
+        }
+        if (str.split("").length!=11){
+            message = "请输入11位账号";
+        }
+        return message;
+    }
+
+
+    /**
+     * 密码限制(大小写+数字+6-11位)
+     * @param str
+     * @return
+     */
+    public static String CheckPassword(String str){
+        String Message = "";
+        System.out.println(str);
+        if (str.indexOf(" ")==-1){
+            if (str.split("").length>11 || str.split("").length<6){
+                Message = "请输入6到11位密码";
+            }else {
+                char[] chars = str.toCharArray();
+                Boolean boolen1 = false;
+                Boolean boolen2 = false;
+                Boolean boolen3 = false;
+                for(int i = 0;i < chars.length;i++){
+                    if(chars[i] <= 'Z' && chars[i] >= 'A'){
+                        boolen1 = true;
+                    }
+                    if(chars[i] <= 'z' && chars[i] >= 'a'){
+                        boolen2 = true;
+                    }
+                    if(chars[i] <= '9' && chars[i] >='0'){
+                        boolen3 = true;
+                    }
+                }
+                if (boolen1!=true){Message = "密码中需包含大写字母";}
+                if (boolen2!=true){Message =Message+ "密码中需包含小写字母";}
+                if (boolen3!=true){Message = Message+"密码中需包含阿拉伯数字";}
+                if (boolen1&&boolen2&&boolen3){ Message = "true";}
+            }
+        }else {
+            Message = "密码不能包含空格";
+        }
+        return Message;
+    }
