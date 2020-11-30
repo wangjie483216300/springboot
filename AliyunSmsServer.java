@@ -29,7 +29,7 @@ public class AliyunSmsServer {
     public String sendSmsLogin(String mobile) {
         String vcode=vcode();
         String message="";
-        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI*********", "CKz46X****************");
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou*********", "LTAI*********", "CKz46X****************");
         IAcsClient client = new DefaultAcsClient(profile);
 
         CommonRequest request = new CommonRequest();
@@ -71,7 +71,7 @@ public class AliyunSmsServer {
     public String sendSmsRegist(String mobile) {
         String vcode=vcode();
         String message="";
-        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI4FnUox26oDryS2zWRNKb", "CKz46XnppOQEuVD8Kct9rCkl0HqURA");
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou*********", "LTAI4*********", "CKz4*********");
         IAcsClient client = new DefaultAcsClient(profile);
 
         CommonRequest request = new CommonRequest();
@@ -118,7 +118,7 @@ public class AliyunSmsServer {
     public String sendSmsSetphone(String mobile) {
         String vcode=vcode();
         String message="";
-        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI4FnUox26oDryS2zWRNKb", "CKz46XnppOQEuVD8Kct9rCkl0HqURA");
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou*********", "LT*********", "CK*********");
         IAcsClient client = new DefaultAcsClient(profile);
 
         CommonRequest request = new CommonRequest();
